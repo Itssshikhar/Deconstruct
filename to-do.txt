@@ -1,0 +1,10 @@
+Immediate Action Items
+Week 1-2:
+	Extract activations and set up the sparse autoencoder pipeline.
+	Train initial SAEs on one layer of GPT-2 using a simple dataset like SST-2.
+Week 3-4:
+	Conduct probing and clustering experiments.
+	Test for interpretability against known benchmarks.
+Week 5-6:
+	Summarize results, highlighting specific cases where sparse features offer unique insights.
+	Optionally prepare a demo or visualization tool for presenting findings.
