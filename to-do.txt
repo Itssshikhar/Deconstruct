@@ -1,10 +1,25 @@
-Immediate Action Items
-Week 1-2:
-	Extract activations and set up the sparse autoencoder pipeline.
-	Train initial SAEs on one layer of GPT-2 using a simple dataset like SST-2.
-Week 3-4:
-	Conduct probing and clustering experiments.
-	Test for interpretability against known benchmarks.
-Week 5-6:
-	Summarize results, highlighting specific cases where sparse features offer unique insights.
-	Optionally prepare a demo or visualization tool for presenting findings.
+Super Immediate Action Items:
+- add more sophisticated techniques such as edge attributions, circuit ablation studies, and detailed visualizations based on your experimental needs.
+
+Insights from Sparse Feature Circuits repo:
+
+- Edge Attribution and Connectivity Analysis:
+The minimal version clusters latent neurons and allows simple ablation, but a full replication would compute and analyze the attributions between neurons (i.e., “edges” in the circuit). This involves methods such as integrated gradients or attribution patching to quantify how changes in one SAE latent affect others downstream.
+
+-Analytical Gradient Computation:
+Instead of (or in addition to) relying solely on the autoencoder’s decoder/encoder passes, the reference emphasizes computing gradients on the residual stream and then mapping these gradients through the decoder. This can be more efficient in terms of speed and memory. Implementing this would require a dedicated module for analytical gradient extraction and attribution.
+
+- Inter-layer Circuit Matching:
+Some of the referenced work (e.g., the idea of mechanistic permutability) deals with matching features across layers. In a more complete implementation, you’d include methods to trace and link latent features from one layer to those in another, thereby understanding multi-layer circuit dynamics.
+
+- Advanced Clustering and Circuit Pruning:
+While the basic version uses PCA followed by KMeans for clustering, the reference repository might use more sophisticated sparsification techniques or alternative clustering algorithms to better delineate circuits. This can also involve techniques to prune “error nodes” or high-frequency, less interpretable neurons.
+
+- Comprehensive Evaluation & Ablation Studies:
+A full implementation would integrate robust evaluation routines to assess how much performance is preserved when only the identified circuit is active (e.g., after ablating non-circuit neurons). This goes beyond simply zeroing out neurons—it involves systematically testing the impact on the model’s predictions across different tasks.
+
+- Detailed Visualization Tools:
+Extra visualization modules that map out the circuit structure (for instance, showing a graph of neuron interactions) would be valuable. This might include interactive visualizations or comprehensive plots that highlight both nodes and edge attributions, providing more insight into the circuit’s function.
+
+- Hyperparameter Tuning and Experiment Tracking:
+In a complete replication, you’d likely see more support for tuning the number of clusters, the level of sparsity, and other relevant hyperparameters. Experiment logging and tracking (possibly via specialized dashboards) would help in comparing different configurations.
