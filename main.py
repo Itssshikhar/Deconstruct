@@ -297,16 +297,27 @@ def load_or_process_activations(dataset, tokenizer, model, layer_index):
 
 def main(resume=True):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+<<<<<<< HEAD
 
     # Load GPT-2 model and tokenizer
     model_name = 'gpt2'
     gpt2_model = GPT2Model.from_pretrained(
         model_name, output_hidden_states=True)
+=======
+    logging.info(f"Using device: {device}")
+
+    # Load GPT-2 model and tokenizer
+    model_name = 'gpt2'
+    logging.info("Loading GPT-2 model and tokenizer...")
+    gpt2_model = GPT2Model.from_pretrained(model_name, output_hidden_states=True).to(device)
+>>>>>>> 5527f21 (Updated and added multiple findings)
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
     # Load dataset
+    logging.info("Loading SST-2 dataset...")
     dataset = load_dataset('glue', 'sst2', split='train')
 
+<<<<<<< HEAD
     if resume:
         model, optimizer, start_epoch, losses = load_or_create_model()
         activations_dataset = load_or_process_activations(
@@ -349,9 +360,63 @@ def main(resume=True):
         visualize_detailed_circuits(
             modified_latents, clusters, save_path='detailed_circuit_visualization.png')
 
+=======
+    # Initialize model and optimizer
+    input_dim = 768  # GPT-2's hidden size
+    hidden_dim = 1024
+    
+    if resume and os.path.exists('checkpoints/latest_checkpoint.pt'):
+        logging.info("Resuming from checkpoint...")
+        model, optimizer, start_epoch, losses = load_or_create_model()
+        activations_dataset = load_or_process_activations(dataset, tokenizer, gpt2_model, layer_index=5)
+>>>>>>> 5527f21 (Updated and added multiple findings)
     else:
-        # Run everything from scratch
-        pass
+        logging.info("Starting training from scratch...")
+        model = SparseAutoencoder(input_dim, hidden_dim)
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+        start_epoch = 0
+        losses = []
+        activations_dataset = preprocess_data(dataset, tokenizer, gpt2_model, layer_index=5)
+
+    data_loader = torch.utils.data.DataLoader(
+        activations_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        pin_memory=True if torch.cuda.is_available() else False,
+        num_workers=2
+    )
+
+    if start_epoch < 50:  # num_epochs = 50
+        criterion = nn.MSELoss(reduction='mean')
+        new_losses = train_autoencoder_with_sparsity(
+            data_loader,
+            model,
+            criterion,
+            optimizer,
+            start_epoch=start_epoch,
+            epochs=50
+        )
+        losses.extend(new_losses)
+
+    logging.info("Training complete. Generating visualizations...")
+    visualize_training_progress(losses)
+    latent_representations = get_latent_representations(data_loader, model)
+    
+    # Cluster the latent neurons
+    logging.info("Clustering latent neurons...")
+    clusters, neuron_embeddings = cluster_latent_neurons(latent_representations, n_clusters=5)
+    print("Identified circuits (clusters):", clusters)
+    
+    # Ablate non-circuit neurons
+    target_circuit = 0  # For example, circuit #0
+    logging.info(f"Ablating non-circuit neurons for circuit {target_circuit}...")
+    modified_latents = ablate_non_circuit_neurons(latent_representations, clusters, target_circuit)
+    
+    # Visualize latent space
+    logging.info("Generating latent space visualization...")
+    visualize_detailed_circuits(modified_latents, clusters, save_path='detailed_circuit_visualization.png')
+    logging.info("Process complete!")
+
 
 
 if __name__ == "__main__":
